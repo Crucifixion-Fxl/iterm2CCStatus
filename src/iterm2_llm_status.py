@@ -27,9 +27,10 @@ async def main(connection):
     """iTerm2 StatusBar component main entry."""
     @iterm2.StatusBarRPC
     async def llm_status_coro(knobs):
-        """Called by iTerm2 at update_cadence interval; returns status bar text."""
-        usage = get_last_n_days_usage(app_type=APP_TYPE, days=30)
+        """Called by iTerm2 at update_cadence interval; returns status bar text (selected provider's usage)."""
         provider = get_current_provider(app_type=APP_TYPE)
+        provider_id = provider[0] if provider else None
+        usage = get_last_n_days_usage(app_type=APP_TYPE, days=30, provider_id=provider_id)
         prefix = f"{provider[1]} · " if provider else ""
         if usage:
             total_tokens = usage.input_tokens + usage.output_tokens
@@ -38,9 +39,10 @@ async def main(connection):
         return f"{prefix}✦ — 0 calls · 0 tokens"
 
     async def on_click(session_id: str):
-        """Open popover with current stats (no icons)."""
-        usage = get_last_n_days_usage(app_type=APP_TYPE, days=30)
+        """Open popover with selected provider's stats (no icons)."""
         provider = get_current_provider(app_type=APP_TYPE)
+        provider_id = provider[0] if provider else None
+        usage = get_last_n_days_usage(app_type=APP_TYPE, days=30, provider_id=provider_id)
         provider_name = provider[1] if provider else "—"
         calls = usage.total_calls if usage else 0
         tokens_str = (
@@ -50,9 +52,9 @@ async def main(connection):
         )
         html = f"""
         <div style="font-family:system-ui;padding:10px;min-width:140px;font-size:13px;">
-            <p style="margin:0 0 6px 0;"><strong>Provider</strong></p>
+            <p style="margin:0 0 6px 0;"><strong>选中供应商</strong></p>
             <p style="margin:0 0 10px 0;">{provider_name}</p>
-            <p style="margin:0 0 6px 0;"><strong>Calls</strong> (30d)</p>
+            <p style="margin:0 0 6px 0;"><strong>调用次数</strong> (30d)</p>
             <p style="margin:0 0 10px 0;">{calls}</p>
             <p style="margin:0 0 6px 0;"><strong>Tokens</strong> (30d)</p>
             <p style="margin:0 0 0 0;">{tokens_str}</p>

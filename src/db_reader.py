@@ -46,10 +46,23 @@ def get_db_connection() -> Optional[sqlite3.Connection]:
         return None
 
 
+def _table_has_column(conn: sqlite3.Connection, table: str, column: str) -> bool:
+    """Return True if table has the given column."""
+    # PRAGMA table_info doesn't support ? placeholder; table name is fixed from our code
+    if table != "proxy_request_logs":
+        return False
+    cursor = conn.execute("PRAGMA table_info(proxy_request_logs)")
+    for row in cursor:
+        if row[1] == column:
+            return True
+    return False
+
+
 def get_usage_summary(
     app_type: str = "claude",
     days: int = 0,
-    hours: int = 0
+    hours: int = 0,
+    provider_id: Optional[str] = None,
 ) -> Optional[UsageSummary]:
     """
     Get LLM usage statistics summary.
@@ -58,6 +71,7 @@ def get_usage_summary(
         app_type: App type filter (e.g. "claude", "codex", "opencode").
         days: Filter last N days.
         hours: Filter last N hours.
+        provider_id: If set and table has provider_id column, filter by selected provider (TEXT/UUID).
 
     Returns:
         UsageSummary: Usage statistics summary, or None on failure.
@@ -69,7 +83,11 @@ def get_usage_summary(
     try:
         # Build query conditions
         conditions = ["app_type = ?"]
-        params = [app_type]
+        params: list = [app_type]
+
+        if provider_id is not None and _table_has_column(conn, "proxy_request_logs", "provider_id"):
+            conditions.append("provider_id = ?")
+            params.append(provider_id)
 
         if days > 0 or hours > 0:
             if days > 0:
@@ -124,10 +142,11 @@ def get_today_usage(app_type: str = "claude") -> Optional[UsageSummary]:
 
 def get_last_n_days_usage(
     app_type: str = "claude",
-    days: int = 30
+    days: int = 30,
+    provider_id: Optional[str] = None,
 ) -> Optional[UsageSummary]:
-    """Get usage summary for the last N days."""
-    return get_usage_summary(app_type=app_type, days=days)
+    """Get usage summary for the last N days, optionally for a specific provider."""
+    return get_usage_summary(app_type=app_type, days=days, provider_id=provider_id)
 
 
 def get_current_provider(app_type: str = "claude") -> Optional[tuple]:

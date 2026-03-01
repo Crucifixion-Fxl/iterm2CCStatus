@@ -2,7 +2,11 @@
 
 iTerm2 status bar component that shows LLM usage statistics (calls and tokens) from the [cc-switch](https://github.com/farion1231/cc-switch) proxy. Displays the current provider and last 30 days usage; click the status bar to see a popover with details.
 
-**[中文说明](README.zh-CN.md)**
+**[中文说明](doc/README.zh-CN.md)**
+
+### 使用效果 / Screenshot
+
+![iTerm2 状态栏效果：选中供应商、调用次数与 token 数量](assets/image.png)
 
 ---
 

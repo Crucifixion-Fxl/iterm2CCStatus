@@ -2,7 +2,11 @@
 
 iTerm2 状态栏组件，用于显示 [cc-switch](https://github.com/farion1231/cc-switch) 代理记录的 LLM 使用统计（调用次数与 token 数）。展示当前提供商与最近 30 天用量，点击状态栏可查看详情弹窗。
 
-**[English](README.md)**
+**[English](../README.md)**
+
+### 使用效果
+
+![iTerm2 状态栏效果：选中供应商、调用次数与 token 数量](../assets/image.png)
 
 ---
 
